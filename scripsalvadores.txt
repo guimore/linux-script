@@ -1,0 +1,98 @@
+
+
+---
+
+### 1. Disk Space Monitoring Script
+
+```bash
+#!/bin/bash
+THRESHOLD=80
+# Alert if disk usage is more than 80%.
+USAGE=$(df -h / | awk 'NR==2 {print $5}' | sed 's/%//')
+if [ "$USAGE" -ge "$THRESHOLD" ]; then
+    echo "Disk usage is ${USAGE}%. Please check immediately!"
+else
+    echo "Disk usage is ${USAGE}%. All good."
+fi
+
+```
+
+* **Descripción:** Monitorea el uso del disco raíz (/) y alerta si supera el umbral establecido.
+* **Uso:** Se puede utilizar en un trabajo de cron (`cron job`) para enviar alertas por correo electrónico.
+
+---
+
+### 2. Log File Cleanup Script
+
+```bash
+#!/bin/bash
+LOG_DIR="/var/log/myapp"
+DAYS=7
+# Delete log files older than 7 days
+find $LOG_DIR -type f -name "*.log" -mtime +$DAYS -exec rm -f {} \;
+echo "Old log files deleted successfully."
+
+```
+
+* **Descripción:** Ayuda a eliminar archivos de registro (`logs`) antiguos para liberar espacio en disco.
+* **Uso:** Utilizar en `cron` para una limpieza automática.
+
+---
+
+### 3. Service Health Check Script
+
+```bash
+#!/bin/bash
+SERVICE_NAME="nginx"
+# Check if a service is running
+if systemctl is-active --quiet $SERVICE_NAME; then
+    echo "$SERVICE_NAME is running,"
+else
+    echo "$SERVICE_NAME is not running. Restarting..."
+    systemctl start $SERVICE_NAME
+    echo "$SERVICE_NAME restarted successfully."
+fi
+
+```
+
+* **Descripción:** Comprueba si un servicio está en ejecución. Si no lo está, inicia el servicio automáticamente.
+* **Uso:** Se puede extender para enviar alertas.
+
+---
+
+### 4. Automated Backup Script
+
+```bash
+#!/bin/bash
+BACKUP_DIR="/backup"
+SOURCE_DIR="/data"
+DATE=$(date +%F)
+mkdir -p $BACKUP_DIR
+tar -czf "$BACKUP_DIR/backup_$DATE.tar.gz" $SOURCE_DIR
+echo "Backup completed: $BACKUP_DIR/backup_$DATE.tar.gz"
+
+```
+
+* **Descripción:** Crea una copia de seguridad comprimida del directorio `/data`.
+* **Uso:** Se puede programar utilizando `cron`.
+
+---
+
+### 5. User Management Script
+
+```bash
+#!/bin/bash
+USERNAME=$1
+if [ -z "$USERNAME" ]; then
+    echo "Usage: $0 <username>"
+    exit 1
+fi
+useradd $USERNAME
+echo "$USERNAME: Welcome123" | chpasswd
+usermod -aG sudo $USERNAME
+echo "User $USERNAME created and added to sudo group."
+
+```
+
+* **Descripción:** Crea un nuevo usuario, le asigna una contraseña predeterminada y lo añade al grupo `sudo`.
+* **Uso:** `./create_user.sh <username>`
